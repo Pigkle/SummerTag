@@ -23,7 +23,7 @@ app.post("/send-tag-email", async (req, res) => {
   try {
     const data = await mg.messages.create("sandbox4da2976472a74df1a87131f6e5772627.mailgun.org", {
       from: "Tag Game <noreply@sandbox4da2976472a74df1a87131f6e5772627.mailgun.org>",
-      to: [admin@reantec.xyz],
+      to: ["admin@reantec.xyz"],
       subject,
       text,
     });
