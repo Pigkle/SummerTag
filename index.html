@@ -405,8 +405,6 @@
                 callback(null);
             });
         }
-       
-        const encodedEmail = textToBase64(playerEmail);
         function createGame() {
             const name = document.getElementById('playerName').value.trim();
             const email = document.getElementById('playerEmail').value.trim();
@@ -420,6 +418,7 @@
             }
             playerName = name.trim();
             playerEmail = email;
+            const encodedEmail = playerEmail ? btoa(playerEmail.trim()) : "";
             gameId = Math.random().toString(36).substring(2, 8);
             // For new games, always create a new playerId
             playerId = 'player_' + Math.random().toString(36).substring(2, 8);
@@ -457,6 +456,7 @@
                     playerId = 'player_' + Math.random().toString(36).substring(2, 8);
                 }
                 initGame();
+                const encodedEmail = playerEmail ? btoa(playerEmail.trim()) : "";
                 db.ref(`emails/${playerId}`).set({
                     name: playerName,
                     email: encodedEmail,
@@ -483,6 +483,7 @@
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
+                const encodedEmail = playerEmail ? btoa(playerEmail.trim()) : "";
                 // Update player position, name, and email in database
                 db.ref(`games/${gameId}/players/${playerId}`).update({
                     position: currentPosition,
@@ -930,7 +931,6 @@ function showActivity() {
                 }
             });
         });
-
     location.reload(); 
     })
     .catch(error => {
