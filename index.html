@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="author" content="Nathan Collins">
     <title>Tag!</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -232,9 +232,45 @@
         .button-row button {
             margin: 0;
         }
+        .game-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #232946;
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 0;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.25);
+    z-index: 5000;
+}
+
+.game-nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #a3bffa;
+    font-size: 1em;
+    padding: 8px 0;
+}
+
+.game-nav button:hover {
+    background: #393e4f;
+    color: #ffe066;
+}
+    #activityContent {
+    max-height: 400px;   /* Adjust height as needed */
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    z-index: 100000;
+}
+
     </style>
 </head>
 <body>
+
     <div id="login">
         <h1>Summer Tag</h1>
         <input type="email" id="playerEmail" placeholder="Email notifications (optional)" autocomplete="email" style="margin-bottom: 5;">
@@ -244,10 +280,9 @@
             <button onclick="joinGame()">Join Game</button>
             <button onclick="createGame()">Create New Game</button>
         </div>
-        <button onclick="showLeaderboard()">Leaderboard</button>
         <button onclick="showHowToPlay()" style="margin-top: 10px;">How to Play</button>
     </div>
-
+    
     <div id="game" style="display: none;">
         <div class="game-main">
             <h2>Game Code: <span id="gameCode"></span></h2>
@@ -263,9 +298,11 @@
                 <button id="tagButton" onclick="tagPlayer()">Tag!</button>
                 <div id="cooldownTimer" style="display:none; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:2.2em; color:#ff4444; font-weight:700; background:rgba(34,39,54,0.95); padding:18px 48px; border-radius:18px; z-index:2100; text-align:center;"></div>
             </div>
-            <div style="width:100%; display:flex; justify-content:center; align-items:center; margin-top: 18px;">
-                <button onclick="showLeaderboard()" style="font-size:1.2em;">Leaderboard</button>
-            </div>
+        </div>
+        <div id="gameNav" class="game-nav">
+            <button onclick="showLeaderboard()">Leaderboard</button>
+            <button onclick="showActivity()">Activity</button>
+            <button onclick="showHowToPlay()">Help</button>
         </div>
     </div>
 
@@ -279,7 +316,7 @@
     </div>
 
     <!-- How to Play Modal -->
-    <div id="howToPlayModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,20,30,0.65); z-index:1001; align-items:center; justify-content:center;">
+    <div id="howToPlayModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,20,30,0.65); z-index:100001; align-items:center; justify-content:center;">
         <div style="background:#232946; padding:36px 28px 28px 28px; border-radius:16px; max-width:420px; margin:auto; position:relative; box-shadow:0 8px 32px rgba(20,20,30,0.28); text-align:center; color:#f4f4f8; display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <h2 style="color:#a3bffa; margin-bottom:18px;">How to Play</h2>
             <div style="margin-bottom:18px; text-align:left;">
@@ -293,10 +330,27 @@
                     <li>Rejoin a game with the same name to continue as your player.</li>
                 </ol>
                 <p style="margin-top:1em; color:#ffe066;"><b>Tip:</b> Play outside for the best experience!</p>
+                <button onclick="leaveGame()" style="background-color: red; color: red;">Leave Game</button>
             </div>
             <button onclick="hideHowToPlay()" style="background:#393e4f; color:#f4f4f8; border-radius:50%; width:32px; height:32px; padding:0; font-size:1.2em; position:absolute; top:10px; right:10px; box-shadow:none;">X</button>
         </div>
     </div>
+<div>
+    <div id="activityModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,20,30,0.65); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:#232946; padding:36px 28px 28px 28px; border-radius:16px; max-width:420px; margin:auto; position:relative; box-shadow:0 8px 32px rgba(20,20,30,0.28); text-align:center; color:#f4f4f8; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <h2 style="color:#a3bffa; margin-bottom:18px;">Recent Activity</h2>
+            <div id="activityContent" style="margin-bottom:18px; text-align:left; max-height:400px; overflow-y:auto;">
+                <!-- Recent activity will be dynamically inserted here -->
+                <p>Loading...</p>
+            </div>
+            <button onclick="hideActivityModal()" style="background:#393e4f; color:#f4f4f8; border-radius:50%; width:32px; height:32px; padding:0; font-size:1.2em; position:absolute; top:10px; right:10px; box-shadow:none;">X</button>
+        </div>
+    </div>
+</div>
+  
+<script>
+
+</script>    
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -321,7 +375,7 @@
         firebase.auth().signInAnonymously()
     .then(() => {
         console.log('Signed in securely!');
-      
+    
     })
     .catch((error) => {
         console.error('Auth error:', error);
@@ -351,6 +405,7 @@
                 callback(null);
             });
         }
+       
         const encodedEmail = textToBase64(playerEmail);
         function createGame() {
             const name = document.getElementById('playerName').value.trim();
@@ -375,7 +430,7 @@
                 timestamp: Date.now()
             });
         }
-
+ 
         function joinGame() {
             const name = document.getElementById('playerName').value.trim();
             const email = document.getElementById('playerEmail').value.trim();
@@ -534,32 +589,46 @@
                     name = window._currentPlayers[currentItId].name || currentItId;
                 }
                 document.getElementById('currentIt').textContent = name;
+
+                 // If I just became "It", trigger immediate proximity check
+                 if (currentItId === playerId) {
+                   console.log("Forcing immediate proximity check");
+                  checkProximity();
+                }
             });
         }
 
         function checkProximity() {
-            db.ref(`games/${gameId}/players`).once('value', snapshot => {
-                const players = snapshot.val() || {};
-                let nearbyPlayer = false;
+    db.ref(`games/${gameId}/players`).once('value', snapshot => {
+        const players = snapshot.val() || {};
+        let nearbyPlayer = false;
 
-                Object.entries(players).forEach(([id, data]) => {
-                    if (id !== playerId && data.position) {
-                        const distance = calculateDistance(
-                            currentPosition.lat,
-                            currentPosition.lng,
-                            data.position.lat,
-                            data.position.lng
-                        );
+        Object.entries(players).forEach(([id, data]) => {
+            if (id !== playerId && data.position) {
+                const distance = calculateDistance(
+                    currentPosition.lat,
+                    currentPosition.lng,
+                    data.position.lat,
+                    data.position.lng
+                );
+                if (distance <= TAG_DISTANCE) {
+                    nearbyPlayer = true;
+                }
+            }
+        });
 
-                        if (distance <= TAG_DISTANCE) {
-                            nearbyPlayer = true;
-                        }
-                    }
-                });
+        // Check if current player is "It" OR nobody is "It"
+        db.ref(`games/${gameId}/currentIt`).once('value', itSnapshot => {
+            const currentItId = itSnapshot.val();
 
-                document.getElementById('tagButton').style.display = nearbyPlayer ? 'block' : 'none';
-            });
-        }
+            if ((currentItId === playerId || currentItId === null) && nearbyPlayer) {
+                document.getElementById('tagButton').style.display = 'block';
+            } else {
+                document.getElementById('tagButton').style.display = 'none';
+            }
+        });
+    });
+}
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3; // Earth's radius in meters
@@ -657,7 +726,98 @@
                 }
             });
         }
+// Show the activity modal
+function showActivityModal() {
+    const modal = document.getElementById("activityModal");
+    modal.style.display = 'flex'; // Change display to 'flex' to show the modal
+    console.log("Fetching activity for gameId:", gameId);  // Log gameId
+}
 
+// Hide the activity modal
+function hideActivityModal() {
+    const modal = document.getElementById("activityModal");
+    modal.style.display = 'none'; // Hide the modal
+}
+
+function showActivity() {
+    let activityGameId = gameId || document.getElementById('joinCode').value;
+
+    if (!activityGameId) {
+        document.getElementById('activityContent').innerHTML = 'Enter a game code or join a game to see recent activity.';
+        document.getElementById('activityModal').style.display = 'flex';
+        return;
+    }
+
+    console.log(`Fetching activity for gameId: ${activityGameId}`);
+
+    // First fetch all players to map playerId -> playerName
+    db.ref(`games/${activityGameId}/players`).once('value', playersSnapshot => {
+        const players = playersSnapshot.val() || {};
+
+        // Build a map of playerId -> name
+        const playerNames = {};
+        Object.entries(players).forEach(([id, data]) => {
+            playerNames[id] = data.name || id;  // fallback to id if name is missing
+        });
+
+        // Now fetch tagsHistory
+        const tagsRef = db.ref(`games/${activityGameId}/tagsHistory`);
+        tagsRef.once('value', snapshot => {
+            if (snapshot.exists()) {
+                let content = '<h3>Recent Activity</h3>';
+                content += `
+                    <table style="width:100%; text-align:left; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px; border: 1px solid #ddd">Tagger</th>
+                                <th style="padding: 8px; border: 1px solid #ddd">Tagged</th>
+                                <th style="padding: 8px; border: 1px solid #ddd">Location</th>
+                                <th style="padding: 8px; border: 1px solid #ddd">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                snapshot.forEach(childSnapshot => {
+                    const tag = childSnapshot.val();
+                    const taggerId = tag.tagger || 'Unknown';
+                    const taggedId = tag.tagged || 'Unknown';
+
+                    // Look up names from map
+                    const taggerName = playerNames[taggerId] || taggerId;
+                    const taggedName = playerNames[taggedId] || taggedId;
+
+                    const tagLocation = tag.location ? `Lat: ${tag.location.lat}, Lng: ${tag.location.lng}` : 'Unknown location';
+                    const tagTime = new Date(tag.timestamp).toLocaleString();
+
+                    content += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${taggerName}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${taggedName}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${tagLocation}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${tagTime}</td>
+                        </tr>
+                    `;
+                });
+
+                content += `
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('activityContent').innerHTML = content;
+            } else {
+                console.log("No activity found for this gameId.");
+                document.getElementById('activityContent').innerHTML = '<p>No activity found.</p>';
+            }
+
+            showActivityModal();
+        }).catch(error => {
+            console.error("Error fetching activity:", error);
+            document.getElementById('activityContent').innerHTML = '<p>Error fetching activity. Please try again later.</p>';
+            showActivityModal();
+        });
+    });
+}
         // Leaderboard logic
         function showLeaderboard() {
             let lbGameId = gameId || document.getElementById('joinCode').value;
@@ -721,6 +881,75 @@
                 tagButton.style.zIndex = 2000; // or whatever your original z-index is
             }
         }
+        function leaveGame() {
+    if (!gameId || !playerId) {
+        alert("You're not in a game.");
+        return;
+    }
+
+    // Confirm action
+    if (!confirm("Are you sure you want to leave the game? This will remove you from all stats and the map.")) {
+        return;
+    }
+
+    // References
+    const playerRef = db.ref(`games/${gameId}/players/${playerId}`);
+    const emailRef = db.ref(`emails/${playerId}`); // Optional: remove their email
+
+    // Remove player data from the game and clean up
+    Promise.all([
+        playerRef.remove(),
+        emailRef.remove()  // Optional — remove their registered email
+    ])
+    .then(() => {
+        alert('You have left the game.');
+
+        // Optionally reset local variables
+        gameId = null;
+        playerId = null;
+        playerName = null;
+        playerEmail = null;
+        document.getElementById('playerName').value = '';
+        document.getElementById('playerEmail').value = '';
+
+        // Remove the player's marker from the map for everyone
+        if (playerMarkers[playerId]) {
+            playerMarkers[playerId].remove();  // Remove the marker from the map
+            delete playerMarkers[playerId];    // Delete from the playerMarkers object
+        }
+
+        // Broadcast to all players that this player has left
+        db.ref(`games/${gameId}/players`).once('value', snapshot => {
+            snapshot.forEach(childSnapshot => {
+                const otherPlayerId = childSnapshot.key;
+                if (otherPlayerId !== playerId) {
+                    // Update other players' map with this change (e.g., remove the marker)
+                    db.ref(`games/${gameId}/players/${otherPlayerId}`).update({
+                        playerLeft: playerId // Mark the player as leaving for others
+                    });
+                }
+            });
+        });
+
+    location.reload(); 
+    })
+    .catch(error => {
+        console.error("Error leaving game:", error);
+        alert('Error leaving game. Please try again.');
+    });
+}
+// Listen for player leaving and update the map for all clients
+db.ref(`games/${gameId}/players`).on('child_changed', (snapshot) => {
+    const playerData = snapshot.val();
+    if (playerData && playerData.playerLeft) {
+        const leavingPlayerId = playerData.playerLeft;
+        // Remove the marker of the player who left
+        if (playerMarkers[leavingPlayerId]) {
+            playerMarkers[leavingPlayerId].remove();  // Remove from map
+            delete playerMarkers[leavingPlayerId];    // Remove from playerMarkers object
+        }
+    }
+});
     </script>
 </body>
 </html>
