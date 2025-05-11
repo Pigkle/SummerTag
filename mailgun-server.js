@@ -13,7 +13,7 @@ serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 
 // Initialize Firebase Admin (Make sure you have your service account JSON set up)
 admin.initializeApp({
-  credential: admin.credential.applicationDefault(), // Or use serviceAccount if needed
+   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://tag-6d9b8-default-rtdb.firebaseio.com/" 
 });
 
