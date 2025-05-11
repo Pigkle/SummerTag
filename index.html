@@ -301,7 +301,8 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
     <script>
         // Initialize Firebase (Add your Firebase config here)
         const firebaseConfig = {
@@ -316,6 +317,15 @@
         };
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        firebase.auth().signInAnonymously()
+    .then(() => {
+        console.log('Signed in securely!');
+      
+    })
+    .catch((error) => {
+        console.error('Auth error:', error);
+    });
 
         let map, currentPosition, playerMarkers = {}, gameId, playerId, playerName, playerEmail;
         const TAG_DISTANCE = 5; // Distance in meters to allow tagging
@@ -327,7 +337,6 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
         }
-
         // Helper: Find playerId by name in the current game
         function findPlayerIdByName(gameId, name, callback) {
             db.ref(`games/${gameId}/players`).once('value', snapshot => {
@@ -342,7 +351,7 @@
                 callback(null);
             });
         }
-
+        const encodedEmail = textToBase64(playerEmail);
         function createGame() {
             const name = document.getElementById('playerName').value.trim();
             const email = document.getElementById('playerEmail').value.trim();
@@ -362,7 +371,7 @@
             initGame();
             db.ref(`emails/${playerId}`).set({
                 name: playerName,
-                email: playerEmail,
+                email: encodedEmail,
                 timestamp: Date.now()
             });
         }
@@ -395,7 +404,7 @@
                 initGame();
                 db.ref(`emails/${playerId}`).set({
                     name: playerName,
-                    email: playerEmail,
+                    email: encodedEmail,
                     timestamp: Date.now()
                 });
             });
@@ -410,7 +419,9 @@
             startLocationTracking();
             listenToGameUpdates();
         }
-
+        function textToBase64(text) {
+            return btoa(text); // Built-in browser function
+        }
         function startLocationTracking() {
             navigator.geolocation.watchPosition(position => {
                 currentPosition = {
@@ -421,7 +432,7 @@
                 db.ref(`games/${gameId}/players/${playerId}`).update({
                     position: currentPosition,
                     name: playerName,
-                    email: playerEmail,
+                    email: encodedEmail,
                     timestamp: Date.now(),
                     tagsMade: firebase.database.ServerValue.increment(0),
                     lastTaggedAt: firebase.database.ServerValue.increment(0)
