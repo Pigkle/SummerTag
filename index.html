@@ -360,7 +360,7 @@
     <script>
         // Initialize Firebase (Add your Firebase config here)
         const firebaseConfig = {
-            apiKey: GOOGLE_API,
+            apiKey: "AIzaSyDCKOfwoAekVcIPnXVTLo1oHu7ge6KvnDk",
             authDomain: "tag-6d9b8.firebaseapp.com",
             databaseURL: "https://tag-6d9b8-default-rtdb.firebaseio.com/",
             projectId: "tag-6d9b8",
@@ -710,14 +710,14 @@
 
                     // Send email notification
                     fetch('https://summertag.onrender.com/send-tag-email', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            to: 'admin@reantec.xyz',
-                            subject: 'Tag Alert!',
-                            text: `${playerName} just tagged ${(players[taggedPlayerId] && players[taggedPlayerId].name) ? players[taggedPlayerId].name : taggedPlayerId} in the game!`
-                        })
-                    })
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        gameId: gameId,
+        taggerName: playerName,
+        taggedName: (players[taggedPlayerId] && players[taggedPlayerId].name) ? players[taggedPlayerId].name : taggedPlayerId
+    })
+})
                     .then(res => res.json())
                     .then(data => console.log('Email API response:', data))
                     .catch(err => console.error('Email API error:', err));
