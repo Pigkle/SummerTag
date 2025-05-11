@@ -6,6 +6,11 @@ import Mailgun from "mailgun.js";
 import admin from "firebase-admin";  // Firebase Admin SDK
 import { Buffer } from "buffer";
 
+// Parse service account from env var
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+
 // Initialize Firebase Admin (Make sure you have your service account JSON set up)
 admin.initializeApp({
   credential: admin.credential.applicationDefault(), // Or use serviceAccount if needed
