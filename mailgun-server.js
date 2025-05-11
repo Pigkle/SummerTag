@@ -13,7 +13,7 @@ serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 
 // Initialize Firebase Admin (Make sure you have your service account JSON set up)
 admin.initializeApp({
-   credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://tag-6d9b8-default-rtdb.firebaseio.com/" 
 });
 
@@ -41,18 +41,27 @@ app.post("/send-tag-email", async (req, res) => {
   const { gameId, taggerName, taggedName } = req.body;
 
   try {
-
+    // Fetch players data from the game
     const playersSnapshot = await db.ref(`games/${gameId}/players`).once('value');
     const players = playersSnapshot.val() || {};
 
-
+    // Initialize an array to store BCC 
     const bccEmails = [];
-    Object.values(players).forEach(player => {
-      if (player.email) {
-        const decodedEmail = decodeBase64(player.email);
+
+    // Loop through each player in the game
+    for (const playerId in players) {
+      const player = players[playerId];
+
+      // Fetch the data from the node
+      const emailSnapshot = await db.ref(`emails/${playerId}/email`).once('value');
+      const encodedEmail = emailSnapshot.val();
+
+      if (encodedEmail) {
+      
+        const decodedEmail = decodeBase64(encodedEmail);
         bccEmails.push(decodedEmail);
       }
-    });
+    }
 
     if (bccEmails.length === 0) {
       return res.status(400).json({ error: "No player emails found" });
@@ -62,6 +71,7 @@ app.post("/send-tag-email", async (req, res) => {
     const subject = 'Tag Alert!';
     const text = `${taggerName} just tagged ${taggedName} in the game!`;
 
+    // Send the notif via Mailgun
     const data = await mg.messages.create("sandbox4da2976472a74df1a87131f6e5772627.mailgun.org", {
       from: "Tag Game <noreply@sandbox4da2976472a74df1a87131f6e5772627.mailgun.org>",
       to: "noreply@sandbox4da2976472a74df1a87131f6e5772627.mailgun.org", // placeholder 'To'
