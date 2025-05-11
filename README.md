@@ -70,6 +70,8 @@ SummerTag is a real-time, location-based web game inspired by the classic playgr
 4. **Deploy**
    - You can deploy the static site to any static hosting provider (e.g., GitHub Pages, Vercel, Netlify).
    - For email notifications, you may need to deploy the backend endpoint (see code for details).
+5. **Check**
+   - Ensure you have everything properly installed, including all packages (firebase-admin, mailgun for email notifications, etc.).
 
 ## Privacy & Safety
 - Location data is only shared while the website is open.
