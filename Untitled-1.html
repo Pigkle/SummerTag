@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Nathan Collins">
+    <title>Tag!</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #232946 0%, #16161a 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: #f4f4f8;
+        }
+        #login {
+            background: rgba(34, 39, 54, 0.98);
+            max-width: 420px;
+            margin: 40px auto 0 auto;
+            padding: 32px 32px 24px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(20,20,30,0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #game {
+            background: none;
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+        }
+        h1, h2 {
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+            color: #a3bffa;
+        }
+        h2 {
+            font-size: 2.2em;
+            margin-top: 32px;
+        }
+        .stats {
+            text-align: center;
+            margin: 32px auto 24px auto;
+            font-size: 1.5em;
+            background: rgba(34, 39, 54, 0.98);
+            border-radius: 16px;
+            padding: 24px 32px;
+            box-shadow: 0 4px 24px rgba(20,20,30,0.18);
+            max-width: 480px;
+            width: 90vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .stats h3 {
+            font-size: 2em;
+            margin: 0.2em 0 0.4em 0;
+        }
+        .stats p {
+            font-size: 1.3em;
+        }
+        #map {
+            height: 60vh;
+            width: 90vw;
+            max-width: 1200px;
+            border-radius: 18px;
+            margin: 0 auto 32px auto;
+            box-shadow: 0 2px 24px rgba(20,20,30,0.18);
+            transition: height 0.4s cubic-bezier(.4,2,.6,1), width 0.4s cubic-bezier(.4,2,.6,1);
+            position: relative;
+        }
+        #tagButton {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 28px 64px;
+            font-size: 2.2em;
+            background: linear-gradient(90deg, #3a506b 0%, #232946 100%);
+            color: #f4f4f8;
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(35,41,70,0.25);
+            z-index: 2000;
+        }
+        #tagButton:hover {
+            background: linear-gradient(90deg, #232946 0%, #3a506b 100%);
+        }
+        button {
+            display: inline-block;
+            background: linear-gradient(90deg, #232946 0%, #393e4f 100%);
+            color: #f4f4f8;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1.1em;
+            font-family: inherit;
+            font-weight: 700;
+            margin: 8px 4px 0 0;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(20,20,30,0.18);
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover, button:focus {
+            background: linear-gradient(90deg, #393e4f 0%, #232946 100%);
+            transform: translateY(-2px) scale(1.04);
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 10px 0 18px 0;
+            border: 1.5px solid #393e4f;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            background: #232946;
+            color: #f4f4f8;
+            transition: border 0.2s, background 0.2s;
+        }
+        input[type="text"]:focus {
+            border: 2px solid #a3bffa;
+            outline: none;
+            background: #16161a;
+        }
+        /* Leaderboard Modal */
+        #leaderboardModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(20,20,30,0.65);
+            z-index: 100000;
+            align-items: center;
+            justify-content: center;
+        }
+        #leaderboardModal[style*="display: flex"] {
+            display: flex !important;
+        }
+        #leaderboardModal > div {
+            background: #232946;
+            padding: 36px 28px 28px 28px;
+            border-radius: 16px;
+            max-width: 420px;
+            margin: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(20,20,30,0.28);
+            text-align: center;
+            color: #16161a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #leaderboardModal h2 {
+            color: #a3bffa;
+            margin-bottom: 18px;
+        }
+        #leaderboardContent {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #leaderboardModal table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #leaderboardModal button {
+            background: #393e4f;
+            color: #f4f4f8;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            font-size: 1.2em;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            box-shadow: none;
+        }
+        #leaderboardModal button:hover {
+            background: #a3bffa;
+            color: #232946;
+        }
+        @media (max-width: 600px) {
+            #login, #game, #leaderboardModal > div {
+                max-width: 98vw;
+                padding: 16px 4vw 12px 4vw;
+            }
+            #map {
+                height: 220px;
+                width: 98vw;
+            }
+            .stats {
+                font-size: 1.1em;
+                padding: 12px 4vw;
+            }
+        }
+        /* Add player label style */
+        .player-label {
+            background: #232946;
+            color: #ffe066;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 2px 10px;
+            font-size: 1.1em;
+            border: 1.5px solid #393e4f;
+            box-shadow: 0 2px 8px rgba(20,20,30,0.18);
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .button-row button {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="login">
+        <h1>Summer Tag</h1>
+        <input type="email" id="playerEmail" placeholder="Email notifications (optional)" autocomplete="email" style="margin-bottom: 5;">
+        <input type="text" id="playerName" placeholder="Enter your name">
+        <input type="text" id="joinCode" placeholder="Enter game code">
+        <div class="button-row">
+            <button onclick="joinGame()">Join Game</button>
+            <button onclick="createGame()">Create New Game</button>
+        </div>
+        <button onclick="showLeaderboard()">Leaderboard</button>
+        <button onclick="showHowToPlay()" style="margin-top: 10px;">How to Play</button>
+    </div>
+
+    <div id="game" style="display: none;">
+        <div class="game-main">
+            <h2>Game Code: <span id="gameCode"></span></h2>
+            <div class="stats">
+                <h3>Total Tags: <span id="tagCount">0</span></h3>
+                <div style="font-size:1.1em; margin-bottom: 0.5em; color:#ffe066;">
+                    Your Tags: <span id="myTagCount">0</span>
+                </div>
+                <p style="font-size:1.5em; margin-top:18px;">Current <span style="color:#a3bffa; font-weight:700;">"It"</span> Player:<br><span id="currentIt" style="font-size:2em; color:#ffe066; font-weight:700;">None</span></p>
+            </div>
+            <div style="position:relative; width:100%; max-width:1200px; margin:0 auto 32px auto;">
+                <div id="map"></div>
+                <button id="tagButton" onclick="tagPlayer()">Tag!</button>
+                <div id="cooldownTimer" style="display:none; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:2.2em; color:#ff4444; font-weight:700; background:rgba(34,39,54,0.95); padding:18px 48px; border-radius:18px; z-index:2100; text-align:center;"></div>
+            </div>
+            <div style="width:100%; display:flex; justify-content:center; align-items:center; margin-top: 18px;">
+                <button onclick="showLeaderboard()" style="font-size:1.2em;">Leaderboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:100000; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:10px; max-width:400px; margin:auto; position:relative;">
+            <h2>Leaderboard</h2>
+            <div id="leaderboardContent">Loading...</div>
+            <button onclick="hideLeaderboard()" style="position:absolute; top:10px; right:10px;">X</button>
+        </div>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,20,30,0.65); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:#232946; padding:36px 28px 28px 28px; border-radius:16px; max-width:420px; margin:auto; position:relative; box-shadow:0 8px 32px rgba(20,20,30,0.28); text-align:center; color:#f4f4f8; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <h2 style="color:#a3bffa; margin-bottom:18px;">How to Play</h2>
+            <div style="margin-bottom:18px; text-align:left;">
+                <ol style="padding-left: 1.2em;">
+                    <li><b>Enter your name,</b> email (optional), and a game code to join an existing game, or create a new game. Make sure you confirm your email for notifications if you sign up for them, and don't forget to check your spam folder!</li>
+                    <li><b>Allow location access</b> so your position can be tracked on the map.</li>
+                    <li>Move in real life! Your location updates in real time on the map for all players <b> only when the website is open!</b> So, be careful to check around you every once in a while.</li>
+                    <li>If you are within 5 meters of another player, the <b>Tag!</b> button will appear. Press it to tag them!</li>
+                    <li>The player who is "It" is shown at the top. When you tag someone, you become "It" and cannot tag anyone for <b>60 seconds.</b></li>
+                    <li>The <b>Leaderboard</b> shows who has the most tags, least tags, and the longest streak of being tagged.</li>
+                    <li>Rejoin a game with the same name to continue as your player.</li>
+                </ol>
+                <p style="margin-top:1em; color:#ffe066;"><b>Tip:</b> Play outside for the best experience!</p>
+            </div>
+            <button onclick="hideHowToPlay()" style="background:#393e4f; color:#f4f4f8; border-radius:50%; width:32px; height:32px; padding:0; font-size:1.2em; position:absolute; top:10px; right:10px; box-shadow:none;">X</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase (Add your Firebase config here)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCKOfwoAekVcIPnXVTLo1oHu7ge6KvnDk",
+            authDomain: "tag-6d9b8.firebaseapp.com",
+            databaseURL: "https://tag-6d9b8-default-rtdb.firebaseio.com/",
+            projectId: "tag-6d9b8",
+            storageBucket: "tag-6d9b8.firebasestorage.app",
+            messagingSenderId: "213574669742",
+            appId: "1:213574669742:web:c405bebca2e66294b4643f",
+            measurementId: "G-42N2SVP35V"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let map, currentPosition, playerMarkers = {}, gameId, playerId, playerName, playerEmail;
+        const TAG_DISTANCE = 5; // Distance in meters to allow tagging
+
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Helper: Find playerId by name in the current game
+        function findPlayerIdByName(gameId, name, callback) {
+            db.ref(`games/${gameId}/players`).once('value', snapshot => {
+                const players = snapshot.val() || {};
+                const lowerName = name.trim().toLowerCase();
+                for (const [id, data] of Object.entries(players)) {
+                    if ((data.name || '').trim().toLowerCase() === lowerName) {
+                        callback(id);
+                        return;
+                    }
+                }
+                callback(null);
+            });
+        }
+
+        function createGame() {
+            const name = document.getElementById('playerName').value.trim();
+            const email = document.getElementById('playerEmail').value.trim();
+            if (!name) {
+                alert('Please enter your name before creating a game.');
+                return;
+            }
+            if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            playerName = name.trim();
+            playerEmail = email;
+            gameId = Math.random().toString(36).substring(2, 8);
+            // For new games, always create a new playerId
+            playerId = 'player_' + Math.random().toString(36).substring(2, 8);
+            initGame();
+            db.ref(`emails/${playerId}`).set({
+                name: playerName,
+                email: playerEmail,
+                timestamp: Date.now()
+            });
+        }
+
+        function joinGame() {
+            const name = document.getElementById('playerName').value.trim();
+            const email = document.getElementById('playerEmail').value.trim();
+            if (!name) {
+                alert('Please enter your name before joining a game.');
+                return;
+            }
+            if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            playerName = name.trim();
+            playerEmail = email;
+            gameId = document.getElementById('joinCode').value;
+            if (!gameId) {
+                alert('Please enter a game code to join.');
+                return;
+            }
+            // Check if player with this name exists
+            findPlayerIdByName(gameId, playerName, function(existingId) {
+                if (existingId) {
+                    playerId = existingId;
+                } else {
+                    playerId = 'player_' + Math.random().toString(36).substring(2, 8);
+                }
+                initGame();
+                db.ref(`emails/${playerId}`).set({
+                    name: playerName,
+                    email: playerEmail,
+                    timestamp: Date.now()
+                });
+            });
+        }
+
+        function initGame() {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('gameCode').textContent = gameId;
+            // playerId is now set before this is called
+            initMap();
+            startLocationTracking();
+            listenToGameUpdates();
+        }
+
+        function startLocationTracking() {
+            navigator.geolocation.watchPosition(position => {
+                currentPosition = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                // Update player position, name, and email in database
+                db.ref(`games/${gameId}/players/${playerId}`).update({
+                    position: currentPosition,
+                    name: playerName,
+                    email: playerEmail,
+                    timestamp: Date.now(),
+                    tagsMade: firebase.database.ServerValue.increment(0),
+                    lastTaggedAt: firebase.database.ServerValue.increment(0)
+                });
+                updatePlayerMarkers();
+                checkProximity();
+            }, error => {
+                console.error('Error getting location:', error);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 2000 // Lower timeout for faster updates
+            });
+        }
+
+        function updatePlayerMarkers() {
+            if (!playerMarkers[playerId]) {
+                playerMarkers[playerId] = L.marker([currentPosition.lat, currentPosition.lng]).addTo(map);
+                // Show own name next to pin
+                playerMarkers[playerId].bindTooltip(playerName, {permanent: true, direction: 'right', className: 'player-label'}).openTooltip();
+            } else {
+                playerMarkers[playerId].setLatLng([currentPosition.lat, currentPosition.lng]);
+                playerMarkers[playerId].setTooltipContent(playerName);
+            }
+        }
+    
+        let cooldownInterval = null;
+        function listenToGameUpdates() {
+            db.ref(`games/${gameId}/players`).on('value', snapshot => {
+                const players = snapshot.val() || {};
+                
+                // Update markers for all players
+                Object.entries(players).forEach(([id, data]) => {
+                    if (id !== playerId && data.position) {
+                        if (!playerMarkers[id]) {
+                            playerMarkers[id] = L.marker([data.position.lat, data.position.lng]).addTo(map);
+                            // Show player name next to pin
+                            playerMarkers[id].bindTooltip(data.name || id, {permanent: true, direction: 'right', className: 'player-label'}).openTooltip();
+                        } else {
+                            playerMarkers[id].setLatLng([data.position.lat, data.position.lng]);
+                            playerMarkers[id].setTooltipContent(data.name || id);
+                        }
+                    }
+                });
+
+                // Update my tag count
+                if (players[playerId] && typeof players[playerId].tagsMade === 'number') {
+                    document.getElementById('myTagCount').textContent = players[playerId].tagsMade;
+                } else {
+                    document.getElementById('myTagCount').textContent = 0;
+                }
+
+                // Store players for currentIt lookup
+                window._currentPlayers = players;
+
+                // Handle cooldown display for "It" player
+                if (players[playerId] && players[playerId].cooldownUntil) {
+                    const cooldownUntil = players[playerId].cooldownUntil;
+                    const now = Date.now();
+                    if (cooldownUntil > now) {
+                        // Show countdown, hide tag button
+                        document.getElementById('tagButton').style.display = 'none';
+                        document.getElementById('cooldownTimer').style.display = 'block';
+                        if (cooldownInterval) clearInterval(cooldownInterval);
+                        function updateCooldown() {
+                            const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+                            document.getElementById('cooldownTimer').textContent = `Tag Cooldown: ${left}s`;
+                            if (left <= 0) {
+                                document.getElementById('cooldownTimer').style.display = 'none';
+                                document.getElementById('tagButton').style.display = 'block';
+                                clearInterval(cooldownInterval);
+                            }
+                        }
+                        updateCooldown();
+                        cooldownInterval = setInterval(updateCooldown, 500);
+                    } else {
+                        document.getElementById('cooldownTimer').style.display = 'none';
+                        document.getElementById('tagButton').style.display = 'block';
+                        if (cooldownInterval) clearInterval(cooldownInterval);
+                    }
+                } else {
+                    document.getElementById('cooldownTimer').style.display = 'none';
+                    document.getElementById('tagButton').style.display = 'block';
+                    if (cooldownInterval) clearInterval(cooldownInterval);
+                }
+                updateTagButtonZIndex();
+            });
+
+            // Listen for tag count updates
+            db.ref(`games/${gameId}/tagCount`).on('value', snapshot => {
+                document.getElementById('tagCount').textContent = snapshot.val() || 0;
+            });
+
+            // Listen for current "it" player updates
+            db.ref(`games/${gameId}/currentIt`).on('value', snapshot => {
+                const currentItId = snapshot.val();
+                let name = 'None';
+                if (window._currentPlayers && currentItId && window._currentPlayers[currentItId]) {
+                    name = window._currentPlayers[currentItId].name || currentItId;
+                }
+                document.getElementById('currentIt').textContent = name;
+            });
+        }
+
+        function checkProximity() {
+            db.ref(`games/${gameId}/players`).once('value', snapshot => {
+                const players = snapshot.val() || {};
+                let nearbyPlayer = false;
+
+                Object.entries(players).forEach(([id, data]) => {
+                    if (id !== playerId && data.position) {
+                        const distance = calculateDistance(
+                            currentPosition.lat,
+                            currentPosition.lng,
+                            data.position.lat,
+                            data.position.lng
+                        );
+
+                        if (distance <= TAG_DISTANCE) {
+                            nearbyPlayer = true;
+                        }
+                    }
+                });
+
+                document.getElementById('tagButton').style.display = nearbyPlayer ? 'block' : 'none';
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        function updateGameStateAfterTag() {
+            db.ref(`games/${gameId}/players/${playerId}/tagsMade`).transaction(current => (current || 0) + 1);
+            db.ref(`games/${gameId}/players/${playerId}/lastTaggedAt`).set(Date.now());
+            db.ref(`games/${gameId}/currentIt`).set(playerId);
+            db.ref(`games/${gameId}/tagCount`).transaction(current => (current || 0) + 1);
+            db.ref(`games/${gameId}/players/${playerId}/cooldownUntil`).set(Date.now() + 60000);
+
+            db.ref(`games/${gameId}/currentIt`).once('value', snapshot => {
+                const prevIt = snapshot.val();
+                if (prevIt && prevIt !== playerId) {
+                    const tagEvent = {
+                        tagger: playerId,
+                        tagged: prevIt,
+                        timestamp: Date.now(),
+                        location: currentPosition
+                    };
+                    db.ref(`games/${gameId}/tagsHistory`).push(tagEvent);
+                }
+            });
+        }
+
+        function tagPlayer() {
+            db.ref(`games/${gameId}/players`).once('value', snapshot => {
+                const players = snapshot.val() || {};
+                let taggedPlayerId = null;
+                let minDistance = TAG_DISTANCE;
+
+                Object.entries(players).forEach(([id, data]) => {
+                    if (id !== playerId && data.position) {
+                        const distance = calculateDistance(
+                            currentPosition.lat,
+                            currentPosition.lng,
+                            data.position.lat,
+                            data.position.lng
+                        );
+                        if (distance <= minDistance) {
+                            minDistance = distance;
+                            taggedPlayerId = id;
+                        }
+                    }
+                });
+
+                if (taggedPlayerId) {
+                    // Update tag counts, history, etc.
+                    db.ref(`games/${gameId}/players/${playerId}/tagsMade`).transaction(current => (current || 0) + 1);
+                    db.ref(`games/${gameId}/players/${taggedPlayerId}/lastTaggedAt`).set(Date.now());
+                    db.ref(`games/${gameId}/currentIt`).set(taggedPlayerId);
+                    db.ref(`games/${gameId}/tagCount`).transaction(current => (current || 0) + 1);
+
+                    // Set cooldown for BOTH players
+                    const cooldownUntil = Date.now() + 60000;
+                    db.ref(`games/${gameId}/players/${playerId}/cooldownUntil`).set(cooldownUntil);
+                    db.ref(`games/${gameId}/players/${taggedPlayerId}/cooldownUntil`).set(cooldownUntil);
+
+                    // Add to tagsHistory
+                    const tagEvent = {
+                        tagger: playerId,
+                        tagged: taggedPlayerId,
+                        timestamp: Date.now(),
+                        location: currentPosition
+                    };
+                    db.ref(`games/${gameId}/tagsHistory`).push(tagEvent);
+
+                    // Send email notification
+                    fetch('https://summertag.onrender.com/send-tag-email', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            to: 'admin@reantec.xyz',
+                            subject: 'Tag Alert!',
+                            text: `${playerName} just tagged ${(players[taggedPlayerId] && players[taggedPlayerId].name) ? players[taggedPlayerId].name : taggedPlayerId} in the game!`
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => console.log('Email API response:', data))
+                    .catch(err => console.error('Email API error:', err));
+                } else {
+                    alert("No player in range to tag!");
+                }
+            });
+        }
+
+        // Leaderboard logic
+        function showLeaderboard() {
+            let lbGameId = gameId || document.getElementById('joinCode').value;
+            if (!lbGameId) {
+                document.getElementById('leaderboardContent').innerHTML = 'Enter a game code or join a game to see the leaderboard.';
+                document.getElementById('leaderboardModal').style.display = 'flex';
+                return;
+            }
+            db.ref(`games/${lbGameId}/players`).once('value', snapshot => {
+                const players = snapshot.val() || {};
+                let leaderboard = [];
+                let now = Date.now();
+                Object.entries(players).forEach(([id, data]) => {
+                    leaderboard.push({
+                        name: data.name || id,
+                        tagsMade: data.tagsMade || 0,
+                        lastTaggedAt: data.lastTaggedAt || 0,
+                        streak: data.lastTaggedAt ? Math.floor((now - data.lastTaggedAt) / 1000) : 'N/A'
+                    });
+                });
+                if (leaderboard.length === 0) {
+                    document.getElementById('leaderboardContent').innerHTML = 'No players yet.';
+                    document.getElementById('leaderboardModal').style.display = 'flex';
+                    return;
+                }
+                // Sort for most/least tags
+                let mostTags = [...leaderboard].sort((a,b) => b.tagsMade - a.tagsMade)[0];
+                let leastTags = [...leaderboard].sort((a,b) => a.tagsMade - b.tagsMade)[0];
+                // Sort for longest streak (not being tagged)
+                let longestStreak = [...leaderboard].sort((a,b) => b.streak - a.streak)[0];
+                let html = `<b>Most Tags:</b> ${mostTags.name} (${mostTags.tagsMade})<br>`;
+                html += `<b>Least Tags:</b> ${leastTags.name} (${leastTags.tagsMade})<br>`;
+                html += `<b>Longest Streak (seconds):</b> ${longestStreak.name} (${longestStreak.streak})<br><hr>`;
+                html += '<table style="width:100%; text-align:left;"><tr><th>Name</th><th>Tags</th><th>Streak (s)</th></tr>';
+                leaderboard.forEach(p => {
+                    html += `<tr><td>${p.name}</td><td>${p.tagsMade}</td><td>${p.streak}</td></tr>`;
+                });
+                html += '</table>';
+                document.getElementById('leaderboardContent').innerHTML = html;
+                document.getElementById('leaderboardModal').style.display = 'flex';
+            });
+        }
+        function hideLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+
+        // How to Play modal logic
+        function showHowToPlay() {
+            document.getElementById('howToPlayModal').style.display = 'flex';
+        }
+        function hideHowToPlay() {
+            document.getElementById('howToPlayModal').style.display = 'none';
+        }
+
+        function updateTagButtonZIndex() {
+            const tagButton = document.getElementById('tagButton');
+            const cooldownTimer = document.getElementById('cooldownTimer');
+            if (cooldownTimer.style.display === 'block') {
+                tagButton.style.zIndex = -10;
+            } else {
+                tagButton.style.zIndex = 2000; // or whatever your original z-index is
+            }
+        }
+    </script>
+</body>
+</html>
