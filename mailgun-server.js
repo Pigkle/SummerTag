@@ -72,9 +72,9 @@ app.post("/send-tag-email", async (req, res) => {
     const text = `${taggerName} just tagged ${taggedName} in the game!`;
 
     // Send the notif via Mailgun
-    const data = await mg.messages.create("sandbox4da2976472a74df1a87131f6e5772627.mailgun.org", {
-      from: "Tag Game <noreply@sandbox4da2976472a74df1a87131f6e5772627.mailgun.org>",
-      to: "noreply@sandbox4da2976472a74df1a87131f6e5772627.mailgun.org", // placeholder 'To'
+    const data = await mg.messages.create("reantec.xyz", {
+      from: "Tag Game <noreply@reantec.xyz>",
+      to: "noreply@reantec.xyz", // placeholder 'To'
       bcc: bccEmails,
       subject,
       text,
