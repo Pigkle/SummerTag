@@ -505,15 +505,20 @@
         }
 
         function updatePlayerMarkers() {
-            if (!playerMarkers[playerId]) {
-                playerMarkers[playerId] = L.marker([currentPosition.lat, currentPosition.lng]).addTo(map);
-                // Show own name next to pin
-                playerMarkers[playerId].bindTooltip(playerName, {permanent: true, direction: 'right', className: 'player-label'}).openTooltip();
-            } else {
-                playerMarkers[playerId].setLatLng([currentPosition.lat, currentPosition.lng]);
-                playerMarkers[playerId].setTooltipContent(playerName);
-            }
-        }
+    if (!playerMarkers[playerId]) {
+        // Create a new marker with initial position
+        playerMarkers[playerId] = L.marker([currentPosition.lat, currentPosition.lng], {
+        }).addTo(map);
+
+        // Show player name as a permanent tooltip
+        playerMarkers[playerId].bindTooltip(playerName, { permanent: true, direction: 'right', className: 'player-label' }).openTooltip();
+    } else {
+        // Animate the marker's transition to the new location
+        playerMarkers[playerId].setLatLng([currentPosition.lat, currentPosition.lng])
+            .setTooltipContent(playerName) // Update the tooltip content (name)
+            .setOpacity(1.0)  // Reset opacity in case it's been modified
+    }
+}
     
         let cooldownInterval = null;
         function listenToGameUpdates() {
