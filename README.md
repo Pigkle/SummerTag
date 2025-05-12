@@ -30,10 +30,10 @@
                            .   .  .      .     .  .      .     .  .      .     .  .
 
 
-SummerTag is a real-time, location-based web game inspired by the classic playground game of tag! Players join or create games, move around in the real world, and tag each other when within close proximity, all visualized on a live map. The game is built using HTML, CSS, JavaScript, Leaflet.js for mapping, and Firebase for real-time data.
+SummerTag is a real-time, location-based web game inspired by the classic playground game of tag! Players join or create games, move around in the real world, and tag each other when within close proximity, all visualized on a live map. The game is built using HTML, CSS, JavaScript, Leaflet.js for mapping, Mailgun for notifications, and Firebase for real-time data. 
 
 ## Features
-- **Real-time multiplayer tag**: See all players' locations live on a map.
+- **Real-time multiplayer tag**: See all players' locations live on a map. No player has an advantage over another; all you get is the name of the person who is "It."
 - **Tagging**: Tag other players when you are within 5 meters of them.
 - **Cooldown**: After tagging, both players have a 60-second cooldown before they can tag again.
 - **Leaderboard**: View stats for most tags, least tags, and longest streaks.
