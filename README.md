@@ -73,6 +73,13 @@ SummerTag is a real-time, location-based web game inspired by the classic playgr
 5. **Check**
    - Ensure you have everything properly installed, including all packages (firebase-admin, mailgun for email notifications, etc.).
 
+## Future Additions
+- Animations!
+- Player accounts and account settings.
+- Buyable upgrades (tagback, etc.)
+- Customizable Game Rules.
+- In-Game messaging.
+
 ## Privacy & Safety
 - Location data is only shared while the website is open.
 - Email is optional and only used for notifications.
