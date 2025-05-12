@@ -44,7 +44,7 @@ SummerTag is a real-time, location-based web game inspired by the classic playgr
 1. Enter your name and (optionally) your email for notifications.
 2. Enter a game code to join an existing game, or create a new game.
 3. Allow location access so your position can be tracked.
-4. Move in real life! Your location updates in real time for all players while the website is open.
+4. Move in real life! Your location updates in real time for all players **only** while the website is open! Stay on your feet!
 5. If you are within 5 meters of another player, the **Tag!** button will appear. Press it to tag them!
 6. The player who is "It" is shown at the top. When you tag someone, you become "It" and cannot tag anyone or be tagged for 60 seconds.
 7. The leaderboard shows who has the most tags, least tags, and the longest streak of being tagged.
